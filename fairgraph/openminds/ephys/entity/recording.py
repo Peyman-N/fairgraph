@@ -81,7 +81,8 @@ class Recording(KGObject):
             doc="no description available",
         ),
     ]
-    existence_query_fields = ("channels", "data_location", "recorded_with", "sampling_frequency")
+    existence_query_fields = (
+        "data_location", "recorded_with", "sampling_frequency")
 
     def __init__(
         self,
