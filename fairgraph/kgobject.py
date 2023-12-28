@@ -775,14 +775,20 @@ class KGObject(ContainsMetadata, RepresentsSingleObject, SupportsQuerying):
             warn("Multiple objects with the same name, returning the first. " "Use 'all=True' to retrieve them all")
             return objects[0]
 
-    def show(self, max_width: Optional[int] = None):
+    def show(self, max_width: Optional[int] = None, id_resolvable:Optional[bool] = False):
         """
         Print a table showing the metadata contained in this object.
         """
         if not have_tabulate:
             raise Exception("You need to install the tabulate module to use the `show()` method")
+        
+        if id_resolvable:
+            show_id="https://editor.kg.ebrains.eu/instances/"+self.id[self.id.rfind("/")+1:]
+        else:
+            show_id=str(self.id)
+            
         data = [
-            ("id", str(self.id)),
+            ("id", show_id),
             ("space", str(self.space)),
             ("type", self.type_[0]),
         ] + [(field.name, str(getattr(self, field.name, None))) for field in self.fields]
@@ -840,11 +846,7 @@ class KGObject(ContainsMetadata, RepresentsSingleObject, SupportsQuerying):
         )
         # second pass, we add filters
         query.properties.extend(cls.generate_query_filter_properties(normalized_filters))
-        # third pass, we add sorting, which can only happen at the top level
-        for property in query.properties:
-            if property.name in ("vocab:name", "vocab:fullName", "vocab:lookupLabel"):
-                property.sorted = True
-        # implementation note: the three-pass approach generates queries that are sometimes more verbose
+        # implementation note: the two-pass approach generates queries that are sometimes more verbose
         #                      than necessary, but it makes the logic easier to understand.
         return query.serialize()
 
